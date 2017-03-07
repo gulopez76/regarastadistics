@@ -1,0 +1,32 @@
+{% extends 'datacubes/base.html' %}
+{% block content %}
+     <div class="row">
+         <div class="col-md-12 col-sm-12">
+		<h1 align="left"><p>Manteniment Transportistes</p></h1>
+	 </div>
+	<div class="row">
+	  <div class="col-md-3 hidde-sm"></div>	   
+<!-- detail data -->
+	  <div class="col-md-6">
+	    <div align="center">
+             {% block main-content %}
+	        <div class="datagrid table" style="overflow-x: auto">
+		      <table>
+			<td align="center"; width="10%" nowrap><b>Cod.Tansportista</b></td>
+			<td align="left"; width="90%"><b>Descripción</b></td>
+			{% for codcarrier in carriers %}
+				<tr>
+					<td align="center"><a href="{% url 'datacubes.views.carrier_detail_vw' pk=codcarrier.pk %}">{{ codcarrier.codcarrier }}</td>
+					<td align="left">{{ codcarrier.carriername }}</td>
+				</tr>
+			{% endfor %}
+		      </table>
+		     </div>
+     		{% endblock main-content %}
+	    </div>
+	  </div>
+	    </div>
+	  </div>
+         </div>
+     </div>  
+     {% endblock content %}

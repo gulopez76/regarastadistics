@@ -1,0 +1,12 @@
+{% extends 'datacubes/base_user.html' %}
+
+    {% block title %}Modificar correu electrònic usuari{% endblock title %}
+
+    {% block user_content %}
+	    <h2 class="page-header">Modificar correu electrónic</h2>
+	    <form method="POST">{% csrf_token %}
+		{{ form.as_p }}
+		<button class="btn btn-primary" type="submit">Gravar</button>
+		<a href="{% url 'datacubes.views.index' %}" class="btn btn-warning" type="submit">Cancelar</a>
+	    </form>
+    {% endblock user_content %}

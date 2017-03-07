@@ -1,0 +1,85 @@
+{% extends 'datacubes/base.html' %}
+
+    {% block content %}
+     <div class="row">
+         <div class="col-md-12">
+	    <div class="page-header">
+               <form method="POST" class="posts-form" enctype="multipart/form-data">{% csrf_token %}
+                    <label class="control-label" for="dtini">Desde Data</label>
+                    <input type="date" id="dtini" name="dtini" value="{{ dtini|date:"d/m/Y" }}">
+                    <label class="control-label" for="dtfi">Fins Data</label>
+                    <input type="date" id="dtfi" name="dtfi" value="{{ dtfi|date:"d/m/Y" }}">
+                    <label class="control-label" for="otini">OT</label>
+		    <select name="otini" id="otini">
+			<option value="Totes" selected="selected">Totes</option> 
+		    		{% for idot in otini %}      
+				  {% if extra == "0" %}
+					<option value="{{ idot.ot }}"> {{ idot.ot }}</option>
+				  {% elif extra != "0" %}
+					{% if actualot == idot.ot %}
+						<option value="{{ idot.ot }}" selected="selected"> {{ idot.ot }}</option>
+					{% elif actualot != idot.ot %}
+						<option value="{{ idot.ot }}"> {{ idot.ot }}</option>
+					{% endif %}	
+				  {% endif %}
+		    		{% endfor %}
+		    </select>
+                    <label class="control-label" for="cliini">Client</label>
+		    <select name="cliini" id="cliini">
+			    <option value="Tots" selected="selected">Tots</option> 
+			    {% for idcli in cliini %}
+			   	{% if extra == "0" %}
+					<option value="{{ idcli.clientname }}"> {{ idcli.clientname }} </option> 
+			   	{% elif extra != "0" %}
+					{% if actualcli == idcli.clientname %}
+						<option value="{{ idcli.clientname }}" selected="selected"> {{ idcli.clientname }} </option> 
+					{% elif actualcli != idcli.clientname %}
+						<option value="{{ idcli.clientname }}"> {{ idcli.clientname }} </option> 
+					{% endif %}
+				{% endif %}
+			    {% endfor %}
+		    </select>
+		<br></br>
+		<div align="right">
+                    <button type="submit" name="action" class="btn btn-primary" value="apply">Filtrar</button>
+                    <button type="submit" name="action" class="btn btn-primary" value="export">Exportar</button>
+                    <button type="submit" name="action" class="btn btn-primary" value="reset">Reset</button>
+		    <a href="{% url 'datacubes.views.index' %}" class="btn btn-warning" type="submit">Cancelar</a>
+		 </div>
+               </form>
+            </div>
+         </div>
+     </div>
+     <div class="row">
+         <div class="col-md-12">
+             {% block main-content %}
+	        <div class="datagrid table" style="overflow-x: auto">
+	 	   <table>
+			<td><b>OT</b></td>
+			<td><b>Client</b></td>
+			<td><b>Producte</b></td>
+			<td><b>Cod.Comanda</b></td>
+			<td><b>Total Magatzem</b></td>
+			<td><b>Dt.Expedicio</b></td>
+			<td><b>Transportista</b></td>
+			<td><b>Localització</b></td>
+			<td><b>Màquina</b></td>
+			{% for row in detail %}
+				<tr text-align: right>
+					<td>{{ row.ot|rjust:"7" }}</td>
+					<td>{{ row.clientname|rjust:"50" }}</td>
+					<td>{{ row.codproduct|rjust:"25" }}</td>
+					<td>{{ row.clientcommand|rjust:"30" }}</td>
+					<td align="right">{{ row.totalstorage|floatformat }}</td>
+					<td>{{ row.delivereddate|date:'d/m/Y' }}</td>
+					<td>{{ row.idcarrier|rjust:"50" }}</td>
+					<td>{{ row.location|rjust:"30" }}</td>
+					<td>{{ row.machine|rjust:"25" }}</td>
+				</tr>
+			{% endfor %}
+		   </table>
+	        </div>
+	     {% endblock %}
+         </div>
+     </div>  
+    {% endblock content %}

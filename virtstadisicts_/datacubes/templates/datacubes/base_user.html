@@ -1,0 +1,16 @@
+{% extends 'datacubes/base.html' %}
+
+    {% block content %}
+	    <div class="row">
+		<div class="col-md-2">
+		    <div class="list-group">
+			<a href="{% url 'datacubes.views.edituser_email' %}" class="list-group-item">Modificar email</a>
+			<a href="{% url 'datacubes.views.edituser_password' %}" class="list-group-item">Modificar contraseña</a>
+			<a href="#" class="list-group-item">Modificar foto</a>
+		    </div>
+		</div>
+		<div class="col-md-10">
+		    {% block user_content %}{% endblock user_content %}
+		</div>
+	    </div>
+    {% endblock content %}

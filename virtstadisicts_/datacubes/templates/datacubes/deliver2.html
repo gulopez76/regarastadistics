@@ -1,0 +1,123 @@
+{% extends 'datacubes/base.html' %} 
+{% load datacubes_extras %}
+
+    {% block title %}Expedicions{% endblock title %}
+
+    {% block content %}
+     <div class="row">
+         <div class="col-md-12">
+            {% block main-content %}{% endblock %}
+            <form method="post" action="{{ action }}" enctype="multipart/form-data">
+                {% csrf_token %}
+		{{ formset.management_form }}
+	    <div class="page-header">
+                <div class="form-group">
+                    <label class="control-label" for="dtini">Desde Data</label>
+                    <input type="date" id="dtini" name="dtini" value="{{ dtini|date:"d/m/Y" }}">
+                    <label class="control-label" for="dtfi">Fins Data</label>
+                    <input type="date" id="dtfi" name="dtfi" value="{{ dtfi|date:"d/m/Y" }}">
+                    <label class="control-label" for="otini">OT</label>
+		    <select name="otini" id="otini">
+			<option value="Totes" selected="selected">Totes</option> 
+		    		{% for idot in otini %}      
+				  {% if extra == "0" %}
+					<option value="{{ idot.ot }}"> {{ idot.ot }}</option>
+				  {% elif extra != "0" %}
+					{% if actualot == idot.ot %}
+						<option value="{{ idot.ot }}" selected="selected"> {{ idot.ot }}</option>
+					{% elif actualot != idot.ot %}
+						<option value="{{ idot.ot }}"> {{ idot.ot }}</option>
+					{% endif %}	
+				  {% endif %}
+		    		{% endfor %}
+		    </select>
+                    <label class="control-label" for="cliini">Client</label>
+		    <select name="cliini" id="cliini">
+			    <option value="Tots" selected="selected">Tots</option> 
+			    {% for idcli in cliini %}
+			   	{% if extra == "0" %}
+					<option value="{{ idcli.clientname }}"> {{ idcli.clientname }} </option> 
+			   	{% elif extra != "0" %}
+					{% if actualcli == idcli.clientname %}
+						<option value="{{ idcli.clientname }}" selected="selected"> {{ idcli.clientname }} </option> 
+					{% elif actualcli != idcli.clientname %}
+						<option value="{{ idcli.clientname }}"> {{ idcli.clientname }} </option> 
+					{% endif %}
+				{% endif %}
+			    {% endfor %}
+		    </select>
+		<br></br>
+		<div>
+		    <input type="checkbox" name="trans" value="trans">Assignacio Masiva Transportista</input>
+		    <select name="carriermassive" id="carriermassive"> 
+			 {% for rowcar in carrier %} 
+			    <option value="{{ rowcar.idcarrier }}">{{ rowcar.carriername|ljust:"50" }}</option> 
+			 {% endfor %} 
+		   </select>
+		</div>
+		<br>
+		<div class?"col-sm-2">
+		    <input type="checkbox" name="dtent" value="dtent">Assignacio Masiva Dt.Entrega</input>
+	        </div>
+	        <div class="col-sm-2">
+		    <input type="date" id="dtentrega" name="dtentrega" class="form-control" value="{{ dtentrega|date:"d/m/Y H:i:s" }}"</input>
+		</div>
+		<br>
+		<div align="right">
+                    <button type="submit" name="action" class="btn btn-primary" value="apply">Filtrar</button>
+                    <button type="submit" name="action" class="btn btn-primary" value="save">Gravar</button>
+                    <button type="submit" name="action" class="btn btn-primary" value="reset">Reset</button>
+		    <a href="{% url 'datacubes.views.index' %}" class="btn btn-warning" type="submit">Cancelar</a>
+		 </div>
+               </form>
+            </div>
+		<input type="hidden" name="extra" value="{{formset.extra}}">
+                <div class="form-group">
+		<fieldset>
+		   <div class="datagrid table" style="overflow-x: auto">
+		       <table>
+				<thead>
+				   <tr>
+					<th><label for="sentdate">Dt.Enviada</label></th>
+					<th><label for="ot">OT</label></th>
+					<th><label for="codproduct">Producte</th></label>
+				    	<th><label for="clientcommand">Comanda</th></label>
+				    	<th><label for="deliverparcial">Parcial</th></label>
+				    	<th><label for="delivereddate">Dt.Expedició</th></label>
+				    	<th><label for="totalstorage">Magatzem</th></label>
+				    	<th><label for="idcarrier">Transport</th></label>
+			     	   </tr>
+				</thead>
+				<tbody>
+					 {% for row in rows %}
+						  <tr text-align: right>
+							<td class="col-md-1"><input type="date" id="sentdate" name="sentdate" class="form-control" value="{{ row.sentdate|date:"d/m/Y" }}" readonly></input></td>
+							<td class="col-md-2"><input type="text" id="ot" name="ot" class="form-control" value="{{ row.ot|ljust:"7" }}" readonly></input></td>
+							<td class="col-md-1"><input type="text" id="codproduct" name="codproduct" class="form-control" value="{{ row.codproduct|ljust:"25" }}" readonly></input></td>
+							<td class="col-md-1"><input type="text" id="clientcommand" name="clientcommand" class="form-control" value="{{ row.clientcommand|ljust:"30" }}" readonly></input></td>
+							<td class="col-md-2"><input type="text" id="deliverparcial" name="deliverparcial" class="form-control" value="{{ row.deliverparcial|floatformat|ljust:"12" }}" readonly></input></td>
+							<td class="col-md-2"><input type="date" id="delivereddate" name="delivereddate" class="form-control" value="{{ row.delivereddate|date:"d/m/Y H:i" }}"</input></td>
+							<td class="col-md-1"><input type="text" id="totalstorage" name="totalstorage" class="form-control" value="{{ row.totalstorage|floatformat|ljust:"11" }}" readonly></input></td>
+							<td class="col-md-2">
+							   <select name="idcarrier" id="idcarrier"> 
+								{% for rowcar in carrier %} 
+								 {% if rowcar.idcarrier == row.idcarrier.idcarrier %}
+									<option value="{{ rowcar.idcarrier }}" selected="selected">{{ rowcar.carriername|ljust:"50" }}</option> 
+								 {% elif rowcar.idcarrier != row.idcarrier.idcarrier %}
+									<option value="{{ rowcar.idcarrier }}">{{ rowcar.carriername|ljust:"50" }}</option> 
+								 {% endif %}
+								{% endfor %} 
+							   </select>
+							</td>
+							<td><input type="hidden" id="iddeliver" name="iddeliver" class="form-control" value="{{ row.iddeliver|ljust:"11" }}" readonly></input></td>
+						  </tr>
+					{% endfor %}
+			    </tbody>
+			</table> 
+		   </div>
+		</fieldset>
+                </div>
+            </form>
+         </div>
+      </div>
+    {% endblock content %}

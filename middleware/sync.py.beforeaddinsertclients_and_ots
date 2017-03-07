@@ -1,0 +1,106 @@
+# -*- coding: utf-8 -*-
+import pyodbc
+import json
+import collections
+from decimal import Decimal
+import MySQLdb
+
+db = MySQLdb.connect(host="localhost",    # your host, usually localhost
+                     user="root",         # your username
+                     passwd="Jul020751",  # your password
+                     db="dbregara",
+		     charset='utf8')        # name of the data base
+
+
+1#conn = pyodbc.connect('DRIVER=ms-sql;SERVER=10.25.1.230;PORT=1433;DATABASE=DATO01EGAR;UID=guillem;PWD=Maig160551;TDS_Version=8.0;')
+conn = pyodbc.connect('DRIVER=ms-sql;SERVER=10.111.11.211;PORT=1433;DATABASE=DATO01EGAR;UID=sa;PWD=Jul020751;TDS_Version=8.0;')
+cur = conn.cursor()
+
+cur.execute("""
+		select case 
+				when sal.FECSAL is null then ''
+				else CAST(sal.FECSAL as date) 
+			   end fsend, 
+		       case
+				 when o.FENTREGA is null then ''
+				 else cast(o.FENTREGA as date)
+		       end fdelivered,
+			   replace(ltrim(ol.codigo), '''', '''''') as ot,
+			   ltrim(ol.CODCLI) as codcli,  
+			   replace(ltrim(o.nombre), '''', '''''') as cli, 
+		       	   replace(ltrim(o.descrip), '''', '''''') as otname, 
+		       case 
+				when len(ltrim(ol.producto)) > 0 then ol.producto 
+				when len(ltrim(ol.producto)) = 0 then 
+				 case
+                                  when len(ltrim(sal.CODIGO)) > 0 then sal.CODIGO
+                                  else ''
+                                 end
+		       end as codprod, 
+		       ltrim(o.campo1) as clicom, 
+		       case 
+			  when ol.CANTIDAD is null then 0
+		          else ol.CANTIDAD
+		       end as delivered, 
+		       case 
+			when sal.CANTIDAD is null then 0
+		 	else sal.CANTIDAD
+		       end as quantity,
+		       case
+			when o.cantidad is null then 0
+			else o.cantidad
+		       end as nominal 
+		from   dato01egar.dbo.e_entreg ol right join dato01egar.dbo.e_corden o 
+		  on   o.codigo = ol.codigo  
+		 and   o.codcli = ol.codcli left join dato01egar.dbo.g_salida sal 
+		  on   sal.descri5 = ol.CODIGO 
+		 and   sal.CLIENTE = ol.CODCLI 
+		where  o.FENTREGA between '20140101' and '20170131'
+  		  and  ol.cantidad > 5           
+            """)
+ 
+rows = cur.fetchall()
+
+rl = []
+for r in rows:
+    t = (r.fsend, r.fdelivered, r.ot, r.codcli, r.cli, r.otname, r.codprod, r.clicom, r.delivered, r.quantity, r.nominal)
+    print "========================================================================="
+    print r.fsend 
+    print r.fdelivered 
+    print r.ot 
+    print r.codcli 
+    print r.cli 
+    print r.otname 
+    print r.codprod 
+    print r.clicom 
+    print r.delivered 
+    print r.quantity 
+    print r.nominal
+    print "========================================================================="
+    rl.append(t)
+
+# you must create a Cursor object. It will let
+#  you execute all the queries you need
+    cur = db.cursor()
+
+# Use all the SQL you like
+    cur.execute("SELECT ot  FROM datacubes_ots_deliver where ot = '"+r.ot+"' and codproduct = '"+r.codprod+"' and clientcommand = '"+r.clicom+"' and sentdate ='"+r.fdelivered+"'")
+
+    if cur.rowcount :
+        print "Exist"
+	curupd = db.cursor()
+	upd = "UPDATE datacubes_ots_deliver SET sentdate = '"+r.fdelivered+"', deliverparcial = '"+str(r.delivered)+"', totaldeliver = '"+str(r.quantity)+"', nominalprovided = '"+str(r.nominal)+"', delivereddate = '"+r.fsend+"' where ot = '"+r.ot+"' and codproduct = '"+r.codprod+"' and clientcommand = '"+r.clicom+"' and sentdate ='"+r.fdelivered+"'"
+	print upd
+	curupd.execute(upd)
+    else :
+	print "Not exist"
+	curins = db.cursor()
+	ins = "INSERT INTO datacubes_ots_deliver (sentdate, ot, clientname, otname, codproduct, clientcommand, deliverparcial, totaldeliver, nominalprovided, user_id, delivereddate, idcarrier_id, totalstorage) VALUES ('"+r.fdelivered+"', '"+r.ot+"', '"+r.cli+"', '"+r.otname+"', '"+r.codprod+"','"+r.clicom+"', '" +str(r.delivered)+"','"+str(r.quantity)+"','"+str(r.nominal)+"', 1, '"+r.fsend+"', 1, 0)"
+	print ins 
+	curins.execute(ins) 
+	db.commit()
+#j = json.dumps(rl)
+#rf = '/resource/virtelix/regara/middleware/sync.json'
+#f = open(rf,'w')
+#print >> f, j
+db.close()

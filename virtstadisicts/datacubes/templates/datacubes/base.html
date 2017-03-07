@@ -1,0 +1,38 @@
+{% load staticfiles %}
+{% include 'datacubes/_messages.html' %}
+
+<!DOCTYPE html="es">
+<html lang>
+    <head>
+        <title>Relieves Egara</title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
+        <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap-theme.min.css" %}">
+        <link rel="stylesheet" href="{% static "css/datacubes.css" %}">
+
+    </head>
+
+    <body>
+        {% include "datacubes/navbar.html" %}
+        <div class="container-full">
+          <br>
+            <div class="row">
+                <div class="col-md 12">
+        	{% include "datacubes/_messages.html" %}
+                {% block content %}
+                {% endblock %}
+                </div>
+            </div>
+        </div>
+        <!-- All that javascript -->
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+
+        {% block scripts %}
+        {% endblock %}
+    </body>
+</html>
+

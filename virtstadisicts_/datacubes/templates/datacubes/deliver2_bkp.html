@@ -1,0 +1,130 @@
+{% extends 'datacubes/base.html' %} 
+{% load datacubes_extras %}
+
+    {% block title %}Expedicions{% endblock title %}
+
+    {% block content %}
+     <div class="row">
+         <div class="col-md-12">
+	    <div class="page-header">
+               <form method="POST" class="posts-form" enctype="multipart/form-data">{% csrf_token %}
+                    <label class="control-label" for="dtini">Desde Data</label>
+                    <input type="date" id="dtini" name="dtini" value="{{ dtini|date:"d/m/Y" }}">
+                    <label class="control-label" for="dtfi">Fins Data</label>
+                    <input type="date" id="dtfi" name="dtfi" value="{{ dtfi|date:"d/m/Y" }}">
+                    <label class="control-label" for="otini">OT</label>
+		    <select name="otini" id="otini">
+			<option value="Totes" selected="selected">Totes</option> 
+		    		{% for idot in otini %}      
+				  {% if extra == "0" %}
+					<option value="{{ idot.ot }}"> {{ idot.ot }}</option>
+				  {% elif extra != "0" %}
+					{% if actualot == idot.ot %}
+						<option value="{{ idot.ot }}" selected="selected"> {{ idot.ot }}</option>
+					{% elif actualot != idot.ot %}
+						<option value="{{ idot.ot }}"> {{ idot.ot }}</option>
+					{% endif %}	
+				  {% endif %}
+		    		{% endfor %}
+		    </select>
+                    <label class="control-label" for="cliini">Client</label>
+		    <select name="cliini" id="cliini">
+			    <option value="Tots" selected="selected">Tots</option> 
+			    {% for idcli in cliini %}
+			   	{% if extra == "0" %}
+					<option value="{{ idcli.clientname }}"> {{ idcli.clientname }} </option> 
+			   	{% elif extra != "0" %}
+					{% if actualcli == idcli.clientname %}
+						<option value="{{ idcli.clientname }}" selected="selected"> {{ idcli.clientname }} </option> 
+					{% elif actualcli != idcli.clientname %}
+						<option value="{{ idcli.clientname }}"> {{ idcli.clientname }} </option> 
+					{% endif %}
+				{% endif %}
+			    {% endfor %}
+		    </select>
+		<br></br>
+		<div align="right">
+                    <button type="submit" name="action" class="btn btn-primary" value="apply">Filtrar</button>
+                    <button type="submit" name="action" class="btn btn-primary" value="save">Gravar</button>
+                    <button type="submit" name="action" class="btn btn-primary" value="reset">Reset</button>
+		    <a href="{% url 'datacubes.views.index' %}" class="btn btn-warning" type="submit">Cancelar</a>
+		 </div>
+               </form>
+            </div>
+         </div>
+     </div>
+     <div class="row">
+         <div class="col-md-12">
+             {% block main-content %}{% endblock %}
+            <form method="post" action="{{ action }}" enctype="multipart/form-data">
+                {% csrf_token %}
+		{{ formset.management_form }}
+                <div class="form-group">
+		<input type="hidden" name="extra" value="{{formset.extra}}">
+                <div class="form-group">
+		<fieldset>
+		   <div class="datagrid table" style="overflow-x: auto">
+		       <table>
+				<thead>
+				   <tr>
+					<th><label for="ot">OT</label></th>
+				    	<th><label for="clientname">ClientName</th></label>
+					<th><label for="codproduct">CodProduct</th></label>
+				    	<th><label for="clientcommand">ClientCommand</th></label>
+				    	<th><label for="totalstorage">TotalStorage</th></label>
+				    	<th><label for="idcarrier">CarrierName</th></label>
+			     	   </tr>
+				</thead>
+				<tbody>
+				{% for form in formset %}
+				   <tr text-align: right>
+					{% with rowsot|length as rowsot_count %}
+					   {% with rowsot|get:forloop.counter0 as rowsotvalue %}
+						{% if rowsot_count > 0 and rowsotvalue|length > 0 %}
+							<td class="col-md-1"><input size:"11" type="text" id="ot" name="ot" class="form-control" value="{{ rowsotvalue|ljust:"7" }}" readonly></input></td>
+						{% endif %}
+					   {% endwith %}
+					{% endwith %}
+					{% with rowscli|length as rowscli_count %}
+					   {% with rowscli|get:forloop.counter0 as rowsclivalue %}
+						{% if rowscli_count > 0 and rowsclivalue|length > 0 %}
+							<td class="col-md-3"><input type="text" id="clientname" name="clientname" class="form-control" value="{{ rowsclivalue|ljust:"50" }}" readonly></input></td>
+						{% endif %}
+					   {% endwith %}
+					{% endwith %}
+					{% with rowsprod|length as rowsprod_count %}
+					   {% with rowsprod|get:forloop.counter0 as rowsprodvalue %}
+						{% if rowsprod_count > 0 and rowsprodvalue|length > 0 %}
+							<td class="col-md-2"><input type="text" id="codproduct" name="codprodcut" class="form-control" value="{{ rowsprodvalue|ljust:"25" }}" readonly></input></td>
+						{% endif %}
+					   {% endwith %}
+					{% endwith %}
+					{% with rowscom|length as rowscom_count %}
+					   {% with rowscom|get:forloop.counter0 as rowscomvalue %}
+						{% if rowscom_count > 0 and rowscomvalue|length > 0 %}
+							<td class="col-md-2"><input type="text" id="clientcommand" name="clientcommmand" class="form-control" value="{{ rowscomvalue|ljust:"30" }}" readonly></input></td>
+						{% endif %}
+					   {% endwith %}
+					{% endwith %}
+					{% with rowsstorage|length as rowsstorage_count %}
+					   {% with rowsstorage|get:forloop.counter0 as rowsstoragevalue %}
+						{% if rowsstorage_count == 0 %}
+							<td class="col-md-1"><input type="number" id="totalstorage" name="totalstorage" class="form-control" value=0></input></td>
+						{% elif rowsstorage_count > 0 and rowsstoragevalue|length = 0 %}
+							<td class="col-md-1"><input type="number" id="totalstorage" name="totalstorage" class="form-control" value=0></input></td>
+						{% elif rowsstorage_count > 0 and rowsstoragevalue|length > 0 %}
+							<td class="col-md-1"><input type="number" id="totalstorage" name="totalstorage" class="form-control" value={{ rowsstoragevalue|ljust:"11" }}></input></td>
+						{% endif %}
+					   {% endwith %}
+					{% endwith %}
+				   </tr>
+				{% endfor %}
+				</tbody>
+			</table> 
+		   </div>
+		</fieldset>
+                </div>
+            </form>
+         </div>
+     </div>
+    {% endblock content %}

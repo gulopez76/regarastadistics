@@ -1,0 +1,56 @@
+{% extends 'datacubes/base.html' %}
+{% load staticfiles %}
+
+    {% block content %}
+     <div class="row">
+         <div class="col-md-8 col-sm-12">
+             {% block main-content %}{% endblock %}
+         </div>
+         <div class="col-md-4 hidden-sm">
+             {% block sidebar %}{% endblock %}
+         </div>
+     </div>
+     <div>
+         <h1 align="center">Your medical center for you are healty ...</h1>
+     </div>
+             <div class="col-md-12">
+                <div id="carousel-1" class="carousel slide" data-ride="carousel" data-interval=7000>
+                   <!-- Indicadors -->
+                   <ol class="carousel-indicators">
+                        <li data-target="#carousel-1" data-slide-to="0" class="active"></li>
+                        <li data-target="#carousel-1" data-slide-to="1"></li>
+                        <li data-target="#carousel-1" data-slide-to="2"></li>
+                   </ol> 
+
+                       <!-- Contenidor slides -->
+                       <div class="carousel-inner" role="listbox">
+                          <div class="item active">
+                            <img src="{% static "images/03.png" %}" class="img-responsive" alt="">
+                            <div class="carousel-caption">
+                              <h3>Medical Center Barcelona</h3>
+                              <p>Headline</p>
+                            </div>
+                          </div>
+
+                          <div class="item">
+                            <img src="{% static "images/05.png" %}" class="img-responsive" alt="">
+                            <div class="carousel-caption">
+                              <h3>Medical Center Granollers</h3>
+                              <p>Headline</p>
+                            </div>
+                          </div>
+
+                          <div class="item">
+                            <img src="{% static "images/opensource.png" %}" class="img-responsive" alt="">
+                            <div class="carousel-caption">
+                              <h3>Team</h3>
+                              <p>Headline</p>
+                            </div>
+                          </div>
+                       </div> <!-- end containers -->
+                   </div> <!-- end carousel-inner -->
+                </div> <!-- end col-md-12  -->
+       <div>
+         <h1 align="center">... and  keep fit you</h1>
+       </div>
+    {% endblock content %}

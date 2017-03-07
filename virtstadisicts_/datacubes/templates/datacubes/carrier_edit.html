@@ -1,0 +1,26 @@
+{% extends 'datacubes/base.html' %}
+
+    {% block title %}Transportistes{% endblock title %}
+
+    {% block content %}
+            <h2 class="page-header">Transportistes</h2>
+            <form method="POST" action="{{ action }}" enctype="multipart/form-data">{% csrf_token %}
+                <div class="datagrid table">
+                {{ as_table }}
+                <table border = 1>
+                  <tr>
+                    <th><label class="control-label" for="codcarrier">Codi Transportista</label></th>
+                    <th><label class="control-label" for="carriername">Nom Transportista</label></th>
+                  </tr>
+                  <tr>
+                    <td><input size="3" type="text" id="codcarrier" name="codcarrier" value={{ carriers.codcarrier }}></td>
+                    <td><input size="50" type="text" id="carriername" name="carriername" value={{ carriers.carriername }} ></td>
+                  </tr>
+                </table>
+                </div>
+                <div align = "right">
+                  <button type="submit" name="action" class="btn btn-primary" value="save">Gravar</button>
+                  <a href="{% url 'datacubes.views.carriers_vw' %}" class="btn btn-warning" type="submit">Cancelar</a>
+                </div>
+            </form>
+    {% endblock content %}

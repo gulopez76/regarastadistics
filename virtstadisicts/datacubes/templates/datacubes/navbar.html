@@ -1,0 +1,68 @@
+{% load datacubes_extras  %}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"><img src="{% load staticfiles %} {% static "images/logo.png" %}"></a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+              {% if user.is_authenticated %}
+                <li class="active"><a href="/">Home</a></li>
+                <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"></i>Seguiments<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                                <li><a href="{% url 'datacubes.views.ots_deliver_vw' %}">OTS</a></li>
+                                <li><a href="{% url 'datacubes.views.deliver_vw' %}">Expedicions</a></li>
+                        </ul>
+                </li>
+                <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"></i>Taules Mestres<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                                <li><a href="{% url 'datacubes.views.carrier_vw' %}">Transportistes</a></li>
+                        </ul>
+                </li>
+               {% endif %}
+            </ul>
+           <ul class="nav navbar-nav navbar-right">
+              {% if user.is_authenticated %}
+		{% if user.username == 'billy76' or user.username == 'eduard' %}
+		    {% for usu in pid|photoid %}
+		       {% if user.id == usu.user_id %}
+	 		  <li><img src='{{ STATIC_URL }}images/{{ usu.photo }}' width="48px" height="50px" class="img-responsive" alt=""></li>
+		       {% endif %}
+		    {% endfor %}
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown"></i>Gestio<b class="caret"></b></a>
+				<ul class="dropdown-menu">
+					<li><a href="{% url 'datacubes.views.register_user' %}">Registrar</a></li>
+					<li><a href="{% url 'datacubes.views.user_profile' pk=user.id %}">{{ user.username }}</a></li>
+					<li><a href="{% url 'datacubes.views.logout_user' %}">Sortir</a></li>
+				</ul>
+			</li>
+		{% else %}
+		    {% for usu in pid|photoid %}
+		       {% if user.id == usu.user_id %}
+	 		  <li><img src='{{ STATIC_URL }}images/{{ usu.photo }}' width="48px" height="48px" class="img-responsive" alt=""></li>
+		       {% endif %}
+		    {% endfor %}
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown"></i>Gestio<b class="caret"></b></a>
+				<ul class="dropdown-menu">
+					<li><a href="{% url 'datacubes.views.user_profile' pk=user.id %}">{{ user.username }}</a></li>
+					<li><a href="{% url 'datacubes.views.logout_user' %}">Sortir</a></li>
+				</ul>
+			</li>
+		{% endif %}
+	      {% else %}
+                  <li><a href="{% url 'datacubes.views.login_user' %}">Login</a></li>
+              {% endif %}
+           </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>

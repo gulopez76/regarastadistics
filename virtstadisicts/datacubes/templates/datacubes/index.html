@@ -1,0 +1,57 @@
+{% extends 'datacubes/base_user.html' %}
+{% load staticfiles %}
+
+    {% block user_content %}
+     <div class="row">
+         <div class="col-md-10 col-sm-12">
+             {% block main-content %}{% endblock %}
+         </div>
+         <div class="col-md-2 hidden-sm">
+             {% block sidebar %}{% endblock %}
+         </div>
+     </div>
+             <div class="col-md-10">
+         	  <h3 align="center">RELIEVES EGARA</h3>
+                <div id="carousel-1" class="carousel slide" data-ride="carousel" data-interval=7000>
+                   <!-- Indicadors -->
+                   <ol class="carousel-indicators">
+                        <li data-target="#carousel-1" data-slide-to="0" class="active"></li>
+                        <li data-target="#carousel-1" data-slide-to="1"></li>
+                        <li data-target="#carousel-1" data-slide-to="2"></li>
+                        <li data-target="#carousel-1" data-slide-to="3"</li>
+                        <li data-target="#carousel-1" data-slide-to="4"></li>
+                        <li data-target="#carousel-1" data-slide-to="5"></li>
+                        <li data-target="#carousel-1" data-slide-to="6"></li>
+                   </ol> 
+
+                       <!-- Contenidor slides -->
+                       <div class="carousel-inner" role="listbox">
+                          <div class="item active">
+                            <img src="{% static "images/etiquetes.png" %}" class="img-responsive" alt="">
+<!-- Image 0 -->
+                            <div class="carousel-caption">
+                              <h3>Productes</h3>
+                              <p>Etiquetes </p>
+                            </div>
+                          </div>
+<!-- Image 1 -->
+                          <div class="item">
+                            <img src="{% static "images/innovacio.png" %}" class="img-responsive" alt="">
+                            <div class="carousel-caption">
+                              <h3>I+D+R</h3>
+                              <p>Innovació</p>
+                            </div>
+                          </div>
+<!-- Image 2 -->
+                          <div class="item">
+                            <img src="{% static "images/qualitat.png" %}" class="img-responsive" alt="">
+                            <div class="carousel-caption">
+                              <h3>ISO</h3>
+                              <p>Qualitat</p>
+                            </div>
+                          </div>
+                       </div> <!-- end containers -->
+                   </div> <!-- end carousel-inner -->
+         	  <h3 align="center">CUB DE DADES</h3>
+                </div> <!-- end col-md-12  -->
+    {% endblock user_content %}
