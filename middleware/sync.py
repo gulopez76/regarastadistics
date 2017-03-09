@@ -15,8 +15,8 @@ db = MySQLdb.connect(host="localhost",    # your host, usually localhost
                      charset='utf8')        # name of the data base
 
 
-#conn = pyodbc.connect('DRIVER=ms-sql;SERVER=10.25.1.230;PORT=1433;DATABASE=DATO01EGAR;UID=guillem;PWD=Maig160551;TDS_Version=8.0;')
-conn = pyodbc.connect('DRIVER=ms-sql;SERVER=10.111.11.211;PORT=1433;DATABASE=DATO01EGAR;UID=sa;PWD=Jul020751;TDS_Version=8.0;')
+conn = pyodbc.connect('DRIVER=ms-sql;SERVER=10.25.1.230;PORT=1433;DATABASE=DATO01EGAR;UID=guillem;PWD=Maig160551;TDS_Version=8.0;')
+#conn = pyodbc.connect('DRIVER=ms-sql;SERVER=10.111.11.211;PORT=1433;DATABASE=DATO01EGAR;UID=sa;PWD=Jul020751;TDS_Version=8.0;')
 
 today2 = '2017-02-28'
 week2 = '2016-01-01'
@@ -84,8 +84,8 @@ SELECT e_corden.FENTREGA as fsend
 		       end AS qytotalstorage
                       ,e_corden.REPRESEN
                       ,case 
-                        when e_corden.FECFINAL is not null then e_corden.FECFINAL
-                        else ''
+                        when year(e_corden.FECFINAL) >= 2000 then e_corden.FECFINAL
+                        else NULL
                        end fechafin 
        ,e.FECHA as originaldate
        ,0
@@ -161,8 +161,8 @@ SELECT e_corden.FENTREGA as fsend
                        end AS qytotalstorage
                       ,e_corden.REPRESEN
                       ,case
-                        when e_corden.FECFINAL is not null then e_corden.FECFINAL
-                        else ''
+                        when year(e_corden.FECFINAL) >= 2000 then e_corden.FECFINAL
+                        else NULL
                        end fechafin
        ,e.FECHA as originaldate
        ,0
@@ -245,8 +245,8 @@ SELECT e.FECHA as fsend
 		       end AS qytotalstorage
                       ,e_corden.REPRESEN
                       ,case 
-                        when e_corden.FECFINAL is not null then e_corden.FECFINAL
-                        else ''
+                        when year(e_corden.FECFINAL) >= 2000  then e_corden.FECFINAL
+                        else NULL
                        end fechafin                     
 	,e.FECHA as originaldate
         ,1
@@ -311,10 +311,8 @@ for r in rows:
         print "Exist"
 	if vmulti == 0:
 		upd = "UPDATE datacubes_ots_deliver SET sentdate = '"+r.fsend+"', deliverparcial = '"+str(r.delivered)+"', totaldeliver = '"+str(r.quantity)+"', nominalprovided = '"+str(r.nominal)+"', totalstorage = '"+str(r.qytotalstorage)+"', location = '"+r.location+"', machine = '"+ r.machine+"', agent = '"+r.agent+"', enddate = '"+ str(r.enddate)+"', clicod = '" + r.codcli + "' where ot = '"+r.ot+"' and codproduct = '"+r.codprod+"' and clientcommand = '"+r.clicom+"' and originaldate ='"+str(r.originaldate)+"'"
-		print upd
 	elif vmulti == 1:
 		upd = "UPDATE datacubes_ots_deliver SET sentdate = '"+r.fsend+"', deliverparcial = '"+str(r.delivered)+"', totaldeliver = '"+str(r.quantity)+"', nominalprovided = '"+str(r.nominal)+"', totalstorage = '"+str(r.qytotalstorage)+"', location = '"+r.location+"', machine = '"+ r.machine+"', agent = '"+r.agent+"', enddate = '"+ str(r.enddate)+"', autline = '"+str(r.autline)+"', clicod = '" + r.codcli + "' where ot = '"+r.ot+"' and codproduct = '"+r.codprod+"' and clientcommand = '"+r.clicom+"' and autline ="+str(r.autline)+""
-		print upd
 	try:
 	   curupd.execute(upd)
 	   db.commit()
@@ -326,7 +324,7 @@ for r in rows:
                print "MySQL Error: %s" % str(e)
     else :
         print "Not exist"
-	ins = "INSERT INTO datacubes_ots_deliver (sentdate, ot, clientname, otname, codproduct, clientcommand, deliverparcial, totaldeliver, nominalprovided, user_id, delivereddate, idcarrier_id, totalstorage, location, machine, agent, enddate,originaldate, autline, clicod) VALUES ('"+r.fsend+"', '"+r.ot+"', '"+r.cli+"', '"+r.otname+"', '"+r.codprod+"','"+r.clicom+"', '" +str(r.delivered)+"','"+str(r.quantity)+"','"+str(r.nominal)+"', 1, '', 25,'"+str(r.qytotalstorage)+"', '"+r.location+"', '"+r.machine+"', '"+r.agent+"', '"+str(r.enddate)+"', '"+str(r.originaldate)+"', "+str(r.autline)+",'" + r.codcli + "')"
+	ins = "INSERT INTO datacubes_ots_deliver (sentdate, ot, clientname, otname, codproduct, clientcommand, deliverparcial, totaldeliver, nominalprovided, user_id, delivereddate, idcarrier_id, totalstorage, location, machine, agent, enddate,originaldate, autline, clicod) VALUES ('"+r.fsend+"', '"+r.ot+"', '"+r.cli+"', '"+r.otname+"', '"+r.codprod+"','"+r.clicom+"', '" +str(r.delivered)+"','"+str(r.quantity)+"','"+str(r.nominal)+"', 1, NULL, 25,'"+str(r.qytotalstorage)+"', '"+r.location+"', '"+r.machine+"', '"+r.agent+"', '"+str(r.enddate)+"', '"+str(r.originaldate)+"', "+str(r.autline)+",'" + r.codcli + "')"
         print ins
 	try:
 	   curins.execute(ins) 

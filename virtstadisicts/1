@@ -294,8 +294,8 @@ def deliver_vw(request):
 			print "Length ................",len(up_id)
 			if assignaciomasivadt == 0:
 			 print dtdeltmp[ix]
-			 if dtdeltmp[ix] == '                   ':
-				up_deldt = '0'
+			 if dtdeltmp[ix] == None:
+				up_deldt = ''
 			 else :
 	    			datedelivered = parse(dtdeltmp[ix])
 				up_deldt = datedelivered.strftime("%Y-%m-%d %H:%M:%S")
@@ -308,7 +308,7 @@ def deliver_vw(request):
 				up_car = carriertmp[ix]
 			elif assignaciomasiva == 1:
 				up_car = request.POST['carriermassive']	
-			if up_deldt != '0':
+			if dtdeltmp[ix]:
 				ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car, delivereddate = up_deldt)
 			else:
 				ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car)
