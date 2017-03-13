@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.shortcuts import render
-from .models import ots_deliver, userprofile, ots, ots_clients, carrier
+from .models import ots_deliver, userprofile, ots, ots_clients, carrier, agents
 from django.shortcuts import render,get_object_or_404
 from .forms import registeruser_form, usereditemail_form, usereditpassword_form, ots_deliver_form, carrier_form, deliver_form
 from django.shortcuts import redirect
@@ -208,6 +208,8 @@ def deliver_vw(request):
     action = ""
     car = carrier.objects.values('idcarrier', 'codcarrier','carriername')
     detailct = 0
+    user = request.user
+    print user
 # Wokflow actions
     if request.method == 'POST':
 	if request.POST['action'] == "apply":
@@ -291,15 +293,16 @@ def deliver_vw(request):
 			
 		for ix in range(0,len(ottmp)):
 			up_id = idtmp[ix]
-			print "Length ................",len(up_id)
 			if assignaciomasivadt == 0:
-			 print dtdeltmp[ix]
-			 if dtdeltmp[ix] == None:
-				up_deldt = ''
+			 if dtdeltmp[ix] == '                   ':
+				up_deldt = '0'
 			 else :
-	    			datedelivered = parse(dtdeltmp[ix])
-				up_deldt = datedelivered.strftime("%Y-%m-%d %H:%M:%S")
-				
+				try:
+	    				datedelivered = parse(dtdeltmp[ix])
+					up_deldt = datedelivered.strftime("%Y-%m-%d %H:%M:%S")
+				except:
+					up_deldt = '0'
+	
 			elif assignaciomasivadt == 1:
 				dtent = parse(request.POST['dtentrega'])
 				up_deldt = dtent.strftime("%Y-%m-%d %H:%M:%S")
@@ -308,7 +311,7 @@ def deliver_vw(request):
 				up_car = carriertmp[ix]
 			elif assignaciomasiva == 1:
 				up_car = request.POST['carriermassive']	
-			if dtdeltmp[ix]:
+			if up_deldt != '0':
 				ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car, delivereddate = up_deldt)
 			else:
 				ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car)
@@ -495,10 +498,16 @@ def deliver2_vw(request):
     return render(request, 'datacubes/deliver.html', context)
 
 def ots_deliver_vw(request):
-#    clidataini = ots_clients.objects.order_by('clientname').all()
-#    otdataini = ots.objects.order_by('ot').all()
+    print request.user.id
+    currentagent = agents.objects.values('agentcode').filter(user_id=request.user.id)
+    if request.user.id == 1 or request.user.id == 2 or request.user.id == 12:
+	print "Admin user"
+    	otdataini = ots_deliver.objects.values('ot').order_by('ot').distinct()
+    else:
+	print "Guest user"
+    	otdataini = ots_deliver.objects.values('ot').order_by('ot').filter(agent=currentagent).distinct()
+    
     clidataini = ots_clients.objects.values('clientname').order_by('clientname').distinct()
-    otdataini = ots.objects.values('ot').order_by('ot').distinct()
     dtini  = datetime.datetime.now()
     dtfi = datetime.datetime.now()
     detail = ots_deliver.objects.order_by('sentdate').all().filter(iddeliver=-1)

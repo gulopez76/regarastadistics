@@ -13,6 +13,18 @@ class userprofile(models.Model):
         return self.user.username
 
 
+class agents(models.Model):
+	idagent = models.AutoField(primary_key=True)
+	agentcode = models.CharField(max_length=4, null=False)
+	agentname = models.CharField(max_length=100, null=False)
+	user = models.ForeignKey('auth.User')	
+
+	def save_agent(self):
+		self.save()
+
+	def __str__(self):
+		return self.agentcode
+
 class carrier(models.Model):
 	idcarrier = models.AutoField(primary_key=True)
 	codcarrier = models.CharField(max_length=3, null=False)
