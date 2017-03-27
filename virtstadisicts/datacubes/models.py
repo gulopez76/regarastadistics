@@ -12,6 +12,18 @@ class userprofile(models.Model):
     def __str__(self):
         return self.user.username
 
+	
+class agentsgroups(models.Model):
+	idagentgroup = models.AutoField(primary_key=True)
+	groupagentcode = models.CharField(max_length=3, blank=True)
+	groupagentdesc = models.CharField(max_length=50, blank=True)
+	
+	def save_agentsgroups(self):
+		self.save()
+	
+	def __str__(self):
+		return self.groupagentcode	
+	
 
 class agents(models.Model):
 	idagent = models.AutoField(primary_key=True)
@@ -24,6 +36,17 @@ class agents(models.Model):
 
 	def __str__(self):
 		return self.agentcode
+
+class agentrights(models.Model):
+	idagentrights = models.AutoField(primary_key=True)
+	idagent = models.ForeignKey(agents)
+	idagentgroup = models.ForeignKey(agentsgroups)
+	
+	def save_agentrights(self):
+		self.save
+	
+	def __str__(self):
+		return self.idagent()
 
 class carrier(models.Model):
 	idcarrier = models.AutoField(primary_key=True)

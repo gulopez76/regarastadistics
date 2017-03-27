@@ -1,0 +1,61 @@
+{% extends 'datacubes/base.html' %}
+{% load datacubes_extras %}
+
+     <div class="row">
+         <div class="col-md-12">
+    	   {% block title %}Manteniment Grups Usuari {{ ar2.idagent.agentname }}{% endblock title %}
+	</div>
+    </div>
+    {% block content %}
+     <div class="row">
+         <div class="col-md-12">
+            {% block main-content %}{% endblock %}
+            <form method="post" action="{{ action }}" enctype="multipart/form-data">
+                {% csrf_token %}
+		{{ formset.management_form }}
+	    <div class="page-header">
+                <div class="form-group">
+                    <label class="control-label" for="newgrp">Nou grup</label>
+		    <select name="newgrp" id="newgrp">
+		    		{% for grp in argrps %}      
+					<option value="{{ grp.idagentgroup }}"> {{ grp.groupagentdesc }}</option>
+		    		{% endfor %}
+		    </select>
+		<br></br>
+		<br>
+		<div align="right">
+                    <button type="submit" name="action" class="btn btn-primary" value="add">Afegir</button>
+                    <button type="submit" name="action" class="btn btn-primary" value="del">Esborrar</button>
+                    <button type="submit" name="action" class="btn btn-primary" value="reset">Reset</button>
+		    <a href="{% url 'datacubes.views.index' %}" class="btn btn-warning" type="submit">Cancelar</a>
+		 </div>
+               </form>
+            </div>
+		<input type="hidden" name="extra" value="{{formset.extra}}">
+                <div class="form-group">
+		<fieldset>
+		   <div class="datagrid table" style="overflow-x: auto">
+		       <table>
+				<thead>
+				   <tr>
+					<th><label for="actualgrps">Grup</label></th>
+					<th><label for="delgrp">Esborrar</label></th>
+			     	   </tr>
+				</thead>
+				<tbody>
+					 {% for agent2 in ar2 %}
+						  <tr>
+							<td style="text-align: left"><input type="text" id="actualgrps" name="" class="form-control" value="{{ agent2.idagentgroup.groupagentcode|ljust:"10" }}" readonly></input></td>
+						        <td><input type="checkbox" name="delgrp" value="delgrp"></input>
+							<td><input type="hidden" id="idagentright" name="idagentright" class="form-control" value="{{ agent2.idagentrights }}"</input></td>
+						  </tr>
+					{% endfor %}
+			    </tbody>
+			</table> 
+		   </div>
+		</fieldset>
+                </div>
+            </form>
+         </div>
+      </div>
+    {% endblock content %}

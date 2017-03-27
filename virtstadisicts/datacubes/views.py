@@ -3,9 +3,9 @@
 from django.conf import settings
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.shortcuts import render
-from .models import ots_deliver, userprofile, ots, ots_clients, carrier, agents
+from .models import ots_deliver, userprofile, ots, ots_clients, carrier, agents, agentsgroups, agentrights
 from django.shortcuts import render,get_object_or_404
-from .forms import registeruser_form, usereditemail_form, usereditpassword_form, ots_deliver_form, carrier_form, deliver_form
+from .forms import registeruser_form, usereditemail_form, usereditpassword_form, ots_deliver_form, carrier_form, deliver_form, agentrights_form
 from django.shortcuts import redirect
 from django.template.context_processors import csrf
 from django.contrib.auth.models import User
@@ -41,7 +41,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import Table
 from reportlab.lib.units import inch
-import datetime, timezones
+import datetime, timezones, time
 from django.utils import timezone
 from django.utils.dateformat import DateFormat
 from django.utils.formats import get_format
@@ -164,6 +164,61 @@ def WriteToExcel(weather_data):
 @login_required(login_url='/login/')
 def index(request):
     return render(request, 'datacubes/index.html', {})
+
+@login_required(login_url='/login/')
+def agentrights_vw(request):
+    ar = agentrights.objects.select_related('idagent').select_related('idagentgroup').order_by('idagent')
+    return render(request, 'datacubes/agentrights_list.html', {'ar': ar})
+
+@login_required(login_url='/login/')
+def agentrights_detail_vw(request, pk):
+    ar = agentrights.objects.get(pk=pk)
+    ar2 = agentrights.objects.select_related('idagent').select_related('idagentgroup').filter(idagent =  ar.idagent)
+    argrps = agentsgroups.objects.all()
+    arid = ar.idagent
+
+    if request.method == "POST":
+	if request.POST['action'] == "add":
+	   print "Click option add"
+    	   formset = agentrights_form(request.POST)
+	   newgrp = request.POST['newgrp']
+	   tmpagent = agents.objects.get(agentcode=arid)
+	   tmpnewgrp = agentsgroups.objects.get(idagentgroup=newgrp)
+	   print arid
+	   print tmpagent.idagent
+	   print request.POST['newgrp']
+	   exist = agentrights.objects.filter(idagent=tmpagent.idagent,idagentgroup=tmpnewgrp.idagentgroup)
+	   if not exist:
+	   	newaggrp = agentrights.objects.create(idagent=tmpagent, idagentgroup=tmpnewgrp)
+	elif request.POST['action'] == "del":
+	   print "Click option del"
+    	   formset = agentrights_form(request.POST)
+	   idrecord = request.POST.getlist('idagentright')
+	   delgrp = request.POST.getlist('delgrp')
+	   for ix in range(0,len(delgrp)):
+	    try: 
+		tmpdelrecord = delgrp[ix]
+		tmpidrecord = idrecord[ix]
+		print tmpidrecord
+	        if tmpdelrecord:
+		  	agentrights.objects.filter(idagentrights=tmpidrecord).delete()
+	    except Exception as e:
+		print e
+	elif request.POST['action'] == "reset":
+		formset = agentrights_form()
+		print arid
+		print request.POST['newgrp']
+    else:
+	formset = agentrights_form()
+
+    context = {
+		'formset': formset,
+        	'ar2': ar2,
+	        'argrps': argrps,
+		'arid': arid,
+    	      }
+
+    return render(request, 'datacubes/agentrights_detail.html', context)
 
 @login_required(login_url='/login/')
 def carrier_vw(request):
@@ -293,13 +348,14 @@ def deliver_vw(request):
 			
 		for ix in range(0,len(ottmp)):
 			up_id = idtmp[ix]
+			tmptime = time.strftime("%H:%M:%S")
 			if assignaciomasivadt == 0:
 			 if dtdeltmp[ix] == '                   ':
 				up_deldt = '0'
 			 else :
 				try:
 	    				datedelivered = parse(dtdeltmp[ix])
-					up_deldt = datedelivered.strftime("%Y-%m-%d %H:%M:%S")
+					up_deldt = datedelivered.strftime("%Y-%m-%d")
 				except:
 					up_deldt = '0'
 	
@@ -312,7 +368,9 @@ def deliver_vw(request):
 			elif assignaciomasiva == 1:
 				up_car = request.POST['carriermassive']	
 			if up_deldt != '0':
-				ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car, delivereddate = up_deldt)
+				combined = up_deldt + ' ' + tmptime
+				print combined
+				ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car, delivereddate = combined)
 			else:
 				ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car)
 

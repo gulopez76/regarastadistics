@@ -16,12 +16,13 @@ db = MySQLdb.connect(host="localhost",    # your host, usually localhost
 
 
 conn = pyodbc.connect('DRIVER=ms-sql;SERVER=10.25.1.230;PORT=1433;DATABASE=DATO01EGAR;UID=guillem;PWD=Maig160551;TDS_Version=8.0;')
+#conn = pyodbc.connect('DRIVER=ms-sql;SERVER=10.111.11.211;PORT=1433;DATABASE=DATO01EGAR;UID=sa;PWD=Jul020751;TDS_Version=8.0;')
 
 today2 = '2017-02-28'
 week2 = '2016-01-01'
 todaytmp = date.today()
-dias2 = timedelta(days=45)
-dias = timedelta(days=45)
+dias2 = timedelta(days=15)
+dias = timedelta(days=180)
 week = todaytmp-dias
 today = todaytmp+dias2
 
@@ -83,7 +84,7 @@ SELECT e_corden.FENTREGA as fsend
 		       end AS qytotalstorage
                       ,e_corden.REPRESEN
                       ,case 
-                        when year(e_corden.FECFINAL) >= 2000  then e_corden.FECFINAL
+                        when year(e_corden.FECFINAL) >= 2000 then e_corden.FECFINAL
                         else NULL
                        end fechafin 
        ,e.FECHA as originaldate
@@ -187,7 +188,7 @@ having COUNT(*) = 1) e3
                  where e.cantidad > 5
                    and eo.C44 is not null
 		   and LEN(e_corden.PRODUCTO) = 0
-		   and a.LINEA <> '00001' 
+		   and a.LINEA = '00001' 
 		   and e_corden.FENTREGA between '"""+str(week)+"""' and '"""+str(today)+"""'"""
 )
 
@@ -244,7 +245,7 @@ SELECT e.FECHA as fsend
 		       end AS qytotalstorage
                       ,e_corden.REPRESEN
                       ,case 
-                        when year(e_corden.FECFINAL) >= 2000 then e_corden.FECFINAL
+                        when year(e_corden.FECFINAL) >= 2000  then e_corden.FECFINAL
                         else NULL
                        end fechafin                     
 	,e.FECHA as originaldate
@@ -275,14 +276,11 @@ having COUNT(*) > 1) e3
 curupgrade.close()
 conn.commit()
 
-print ("START PROCESS  MYSQL ............................")
-
 cur = conn.cursor()
 
 cur.execute("""
                  select fsend, ot, codcli, cli, otname, codprod, clicom, delivered, quantity, nominal, location, machine, qytotalstorage, 
                  case when agent is null then 'Sense informar' else agent end as agent, enddate, originaldate, multiline, autline, codcli from tbinformes
-		 order by fsend asc
             """)
  
 rows = cur.fetchall()
@@ -303,7 +301,6 @@ for r in rows:
     curins = db.cursor()
 
 # Use all the SQL you like
-
     vmulti = r.multiline
     if vmulti == 1:
     	curmy.execute("SELECT ot  FROM datacubes_ots_deliver where ot = '"+r.ot+"' and codproduct = '"+r.codprod+"' and clientcommand = '"+r.clicom+"' and autline ='"+str(r.autline)+"'")
@@ -311,6 +308,7 @@ for r in rows:
     	curmy.execute("SELECT ot  FROM datacubes_ots_deliver where ot = '"+r.ot+"' and codproduct = '"+r.codprod+"' and clientcommand = '"+r.clicom+"' and originaldate ='"+str(r.originaldate)+"'")
 
     if curmy.rowcount :
+        print "Exist"
 	if vmulti == 0:
 		upd = "UPDATE datacubes_ots_deliver SET sentdate = '"+r.fsend+"', deliverparcial = '"+str(r.delivered)+"', totaldeliver = '"+str(r.quantity)+"', nominalprovided = '"+str(r.nominal)+"', totalstorage = '"+str(r.qytotalstorage)+"', location = '"+r.location+"', machine = '"+ r.machine+"', agent = '"+r.agent+"', enddate = '"+ str(r.enddate)+"', clicod = '" + r.codcli + "' where ot = '"+r.ot+"' and codproduct = '"+r.codprod+"' and clientcommand = '"+r.clicom+"' and originaldate ='"+str(r.originaldate)+"'"
 	elif vmulti == 1:
@@ -325,7 +323,9 @@ for r in rows:
            except IndexError:
                print "MySQL Error: %s" % str(e)
     else :
+        print "Not exist"
 	ins = "INSERT INTO datacubes_ots_deliver (sentdate, ot, clientname, otname, codproduct, clientcommand, deliverparcial, totaldeliver, nominalprovided, user_id, delivereddate, idcarrier_id, totalstorage, location, machine, agent, enddate,originaldate, autline, clicod) VALUES ('"+r.fsend+"', '"+r.ot+"', '"+r.cli+"', '"+r.otname+"', '"+r.codprod+"','"+r.clicom+"', '" +str(r.delivered)+"','"+str(r.quantity)+"','"+str(r.nominal)+"', 1, NULL, 25,'"+str(r.qytotalstorage)+"', '"+r.location+"', '"+r.machine+"', '"+r.agent+"', '"+str(r.enddate)+"', '"+str(r.originaldate)+"', "+str(r.autline)+",'" + r.codcli + "')"
+        print ins
 	try:
 	   curins.execute(ins) 
 	   db.commit()
@@ -339,61 +339,14 @@ for r in rows:
 curcli = db.cursor()
 curots = db.cursor()
 
-try:
-	curcli.execute('DELETE FROM datacubes_ots_clients')
-except MySQLdb.Error, e:
-        db.rollback()
-        try:
-           print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
-        except IndexError:
-           print "MySQL Error: %s" % str(e)
-
-try:
-	curcli.execute('alter table datacubes_ots_clients auto_increment = 1')
-except MySQLdb.Error, e:
-        db.rollback()
-        try:
-           print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
-        except IndexError:
-           print "MySQL Error: %s" % str(e)
-
-try:
-	curcli.execute('insert into  datacubes_ots_clients (clientname, clicod) select distinct ltrim(clientname), clicod from datacubes_ots_deliver where clientname is not null and clicod is not null')
-except MySQLdb.Error, e:
-        db.rollback()
-        try:
-           print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
-        except IndexError:
-           print "MySQL Error: %s" % str(e)
-
+curcli.execute('DELETE FROM datacubes_ots_clients')
+curcli.execute('alter table datacubes_ots_clients auto_increment = 1')
+curcli.execute('insert into  datacubes_ots_clients (clientname, clicod) select distinct ltrim(clientname), clicod from datacubes_ots_deliver where clientname is not null and clicod is not null')
 db.commit()
 
-try:
-	curots.execute('DELETE FROM datacubes_ots')
-except MySQLdb.Error, e:
-        db.rollback()
-        try:
-           print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
-        except IndexError:
-           print "MySQL Error: %s" % str(e)
-
-try:
-	curots.execute('alter table datacubes_ots auto_increment = 1')
-except MySQLdb.Error, e:
-        db.rollback()
-        try:
-           print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
-        except IndexError:
-           print "MySQL Error: %s" % str(e)
-
-try:
-	curots.execute('insert into  datacubes_ots (ot, otname) select distinct ot, otname from datacubes_ots_deliver')
-except MySQLdb.Error, e:
-        db.rollback()
-        try:
-           print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
-        except IndexError:
-           print "MySQL Error: %s" % str(e)
+curots.execute('DELETE FROM datacubes_ots')
+curots.execute('alter table datacubes_ots auto_increment = 1')
+curots.execute('insert into  datacubes_ots (ot, otname) select distinct ot, otname from datacubes_ots_deliver')
 
 db.commit()
 db.close()

@@ -1,5 +1,5 @@
 from django import forms
-from .models import userprofile, ots_deliver, carrier
+from .models import userprofile, ots_deliver, carrier, agentrights, agents, agentsgroups
 from django.forms.models import inlineformset_factory
 from django.forms import ModelChoiceField, ChoiceField
 from django.contrib.auth.models import User
@@ -11,6 +11,10 @@ from django.forms.extras.widgets import SelectDateWidget
 class FormsetForm(forms.Form):
     delete= forms.BooleanField(required=False, initial=False)
     # some other fields with data
+
+class agentrights_form(forms.Form):
+	agent = forms.CharField(max_length=100)
+	agentgroup = forms.CharField(max_length=3)
 
 class carrier_form(forms.Form):
 	codcarrier = forms.CharField(max_length=3)

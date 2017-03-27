@@ -1,0 +1,32 @@
+{% extends 'datacubes/base.html' %}
+{% block content %}
+     <div class="row">
+         <div class="col-md-12 col-sm-12">
+		<h1 align="left"><p>Manteniment Permisos</p></h1>
+	 </div>
+	<div class="row">
+	  <div class="col-md-3 hidde-sm"></div>	   
+<!-- detail data -->
+	  <div class="col-md-6">
+	    <div align="center">
+             {% block main-content %}
+	        <div class="datagrid table" style="overflow-x: auto">
+		      <table>
+			<td align="center"; width="10%" nowrap><b>Cod.Agent</b></td>
+			<td align="center"; width="90%"><b>Cod.Group</b></td>
+			{% for agent in ar %}
+				<tr>
+					<td align="center"><a href="{% url 'datacubes.views.agentrights_detail_vw' pk=agent.pk %}">{{ agent.idagent.agentname}}</a></td>
+					<td align="center">{{ agent.idagentgroup.groupagentdesc }}</td>
+				</tr>
+			{% endfor %}
+		      </table>
+		     </div>
+     		{% endblock main-content %}
+	    </div>
+	  </div>
+	    </div>
+	  </div>
+         </div>
+     </div>  
+     {% endblock content %}

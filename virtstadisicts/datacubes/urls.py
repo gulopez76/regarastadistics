@@ -15,4 +15,6 @@ urlpatterns = (
 	url(r'^carriers/$', views.carrier_vw, name='carrier_vw'),
 	url(r'^carriers/(?P<pk>[0-9]+)/$', views.carrier_detail_vw, name='carrier_detail_vw'),
 	url(r'^deliver/$', views.deliver_vw, name='deliver_vw'),
+	url(r'^agentrights/$', views.agentrights_vw, name='agentrights_vw'),
+	url(r'^agentrights/(?P<pk>[0-9]+)/$', views.agentrights_detail_vw, name='agentrights_detail_vw'),
 )
