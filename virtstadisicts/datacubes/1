@@ -74,7 +74,8 @@
 		       <tbody>
 			{% for row in detail %}
 				<tr>
-					<td><input type="checkbox" id="delot" name="delot" class="form-control" value="{{ row.iddeliver }}"></input></td>
+					<td style="display:none;">><input type="hidden" id="idotline" name="idotline" class="form-control" value="{{ row.pk }}"</input></td>
+					<td><input type="checkbox" id="delot" name="delot" class="form-control" value="delot"></input></td>
 					<td style="text-align: left">{{ row.sentdate|date:'d/m/Y' }}</td>
 					<td style="text-align: left">{{ row.ot|rjust:"7" }}</td>
 					<td style="text-align: left">{{ row.clientname|ljust:"50" }}</td>

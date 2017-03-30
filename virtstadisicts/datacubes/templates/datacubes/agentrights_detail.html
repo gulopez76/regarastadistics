@@ -46,8 +46,8 @@
 					 {% for agent2 in ar2 %}
 						  <tr>
 							<td style="text-align: left"><input type="text" id="actualgrps" name="" class="form-control" value="{{ agent2.idagentgroup.groupagentcode|ljust:"10" }}" readonly></input></td>
-						        <td><input type="checkbox" name="delgrp" value="delgrp"></input>
-							<td><input type="hidden" id="idagentright" name="idagentright" class="form-control" value="{{ agent2.idagentrights }}"</input></td>
+						        <td><input type="checkbox" name="delgrp" value="{{ agent2.idagentrights }}"></input></td>
+							<td style="display:none;"><input type="hidden" id="idagentid" name="idagentid" class="form-control" value="{{ agent2.idagent_id }}"</input></td>
 						  </tr>
 					{% endfor %}
 			    </tbody>

@@ -4,6 +4,7 @@ from django.conf import settings
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.shortcuts import render
 from .models import ots_deliver, userprofile, ots, ots_clients, carrier, agents, agentsgroups, agentrights
+from django.db.models import Count
 from django.shortcuts import render,get_object_or_404
 from .forms import registeruser_form, usereditemail_form, usereditpassword_form, ots_deliver_form, carrier_form, deliver_form, agentrights_form
 from django.shortcuts import redirect
@@ -193,17 +194,21 @@ def agentrights_detail_vw(request, pk):
 	elif request.POST['action'] == "del":
 	   print "Click option del"
     	   formset = agentrights_form(request.POST)
-	   idrecord = request.POST.getlist('idagentright')
 	   delgrp = request.POST.getlist('delgrp')
-	   for ix in range(0,len(delgrp)):
-	    try: 
-		tmpdelrecord = delgrp[ix]
-		tmpidrecord = idrecord[ix]
-		print tmpidrecord
-	        if tmpdelrecord:
-		  	agentrights.objects.filter(idagentrights=tmpidrecord).delete()
-	    except Exception as e:
-		print e
+	   arid = agentrights.objects.values_list('idagent_id').filter(pk=pk)
+	   qy = agentrights.objects.filter(idagent_id=arid).count()
+	   print qy
+	   if qy > 1:
+		   for ix in range(0,len(delgrp)):
+		    try: 
+			tmpdelrecord = str(delgrp[ix]).replace(".","")
+			print tmpdelrecord
+			if tmpdelrecord:
+				agentrights.objects.filter(idagentrights=tmpdelrecord).delete()
+		    except Exception as e:
+			print e
+	   else:
+		print "Imposible to delete record. Its recordcount equal 1"
 	elif request.POST['action'] == "reset":
 		formset = agentrights_form()
 		print arid
@@ -580,14 +585,15 @@ def ots_deliver_vw(request):
     dtexpedicio = "N/A"
     transportista = "N/A"
     if request.method == 'POST':
-	if request.POST['action'] == "apply":
+	if (request.POST['action'] == "apply") or (request.POST['action'] == "del"):
+	    print "Action to execute %s" % request.POST['action']
             form = ots_deliver_form(request.POST, request.FILES)
 	    actualcli = request.POST['cliini']
 	    actualot = request.POST['otini']
 	    dtini_ = request.POST['dtini']
 	    dtfi_ = request.POST['dtfi']
-	    #print dtini_
-	    #print dtfi_
+	    delot = request.POST.getlist('delot')
+	    print delot
 	    extra = 1
 	    dfini = datetime.datetime.strptime(dtini_, "%d/%m/%Y").date() 
 	    dffi = datetime.datetime.strptime(dtfi_, "%d/%m/%Y").date() 
@@ -609,6 +615,16 @@ def ots_deliver_vw(request):
 		   groups = groups + ',' + ix.idagentgroup.groupagentcode
 
 	    print groups
+            if request.POST['action'] == "del":		
+	   	for ix in range(0,len(delot)):
+			print "I am going to del iddeliver's"
+	    		try: 
+				tmpdel = str(delot[ix]).replace(".","")
+				print "Checkbox del status %s" % tmpdel
+	        		if tmpdel:
+		  			ots_deliver.objects.filter(pk=tmpdel).delete()
+	    		except Exception as e:
+				print e
 
 	    if actualcli == "Tots" and actualot == "Totes":
     	       if request.user.id == 1 or request.user.id == 2 or request.user.id == 12 or request.user.id == 8:
