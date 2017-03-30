@@ -46,6 +46,9 @@ class agentrights(models.Model):
 		self.save
 	
 	def __str__(self):
+		return self.idagentrights()
+	
+	def __str__(self):
 		return self.idagent()
 
 class carrier(models.Model):

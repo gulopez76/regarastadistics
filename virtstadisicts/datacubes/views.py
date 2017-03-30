@@ -370,7 +370,11 @@ def deliver_vw(request):
 			if up_deldt != '0':
 				combined = up_deldt + ' ' + tmptime
 				print combined
-				ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car, delivereddate = combined)
+				oldot = ots_deliver.objects.get(pk=up_id)
+				olddelivered = oldot.delivereddate
+				print "Value for actual date %s" % olddelivered
+				if olddelivered == None:
+					ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car, delivereddate = combined)
 			else:
 				ots_deliver.objects.filter(pk=up_id).update(idcarrier = up_car)
 
@@ -592,25 +596,39 @@ def ots_deliver_vw(request):
     	    v_clicod = ots_clients.objects.values('clicod').filter(clientname = actualcli)
 	    #print dfini
 	    #print dffi
+	    ar = request.user.id
+            print "user to find groups: %s" % ar	
+	    tmpagent = agents.objects.filter(user_id=ar)
+	    tmpagentgrp = agentrights.objects.select_related('idagent').select_related('idagentgroup').filter(idagent=tmpagent)
+	    grps = 'null'
+	    for ix in tmpagentgrp:
+	        if grps == 'null':
+		   groups = ix.idagentgroup.groupagentcode
+	           grps = 'gul'
+	        else:
+		   groups = groups + ',' + ix.idagentgroup.groupagentcode
+
+	    print groups
+
 	    if actualcli == "Tots" and actualot == "Totes":
     	       if request.user.id == 1 or request.user.id == 2 or request.user.id == 12 or request.user.id == 8:
     	         detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(sentdate__range=[str(dfini), str(dffi)])
 	       else:
-    	         detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(sentdate__range=[str(dfini), str(dffi)], agent = currentagent)
+    	         detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(sentdate__range=[str(dfini), str(dffi)], agent__in = groups)
 	    elif actualcli == "Tots" and actualot <> "Totes":
     	      detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(ot = actualot)
 	    elif actualcli <> "Tots" and actualot == "Totes":
     	       if request.user.id == 1 or request.user.id == 2 or request.user.id == 12 or request.user.id == 8:
     	          detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(clicod = v_clicod, sentdate__range=[str(dfini), str(dffi)])
 	       else:
-    	          detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(clicod = v_clicod, sentdate__range=[str(dfini), str(dffi)], agent=curretnagent)
+    	          detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(clicod = v_clicod, sentdate__range=[str(dfini), str(dffi)], agent__in = groups)
 	    elif actualcli <> "Tots" and actualot <> "Totes":
     	      detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(clicod = v_clicod, ot = actualot, sentdate__range=[str(dfini), str(dffi)])
 	    else:
     	       if request.user.id == 1 or request.user.id == 2 or request.user.id == 12 or request.user.id == 8:
     	          detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(sentdate__range=[str(dfini), str(dffi)])
 	       else:
-    	          detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(sentdate__range=[str(dfini), str(dffi)], agent=currentagent)
+    	          detail = ots_deliver.objects.select_related('idcarrier').order_by('sentdate','clientname','ot').all().filter(sentdate__range=[str(dfini), str(dffi)], agent__in = groups)
         elif request.POST['action'] == 'export': 
             form = ots_deliver_form(request.POST, request.FILES)
 	    actualcli = request.POST['cliini']
