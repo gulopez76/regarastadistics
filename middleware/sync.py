@@ -187,7 +187,6 @@ having COUNT(*) = 1) e3
                  where e.cantidad > 5
                    and eo.C44 is not null
 		   and LEN(e_corden.PRODUCTO) = 0
-		   and a.LINEA <> '00001' 
 		   and e_corden.FENTREGA between '"""+str(week)+"""' and '"""+str(today)+"""'"""
 )
 
@@ -276,6 +275,8 @@ curupgrade.close()
 conn.commit()
 
 print ("START PROCESS  MYSQL ............................")
+
+
 
 cur = conn.cursor()
 
@@ -394,6 +395,42 @@ except MySQLdb.Error, e:
            print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
         except IndexError:
            print "MySQL Error: %s" % str(e)
+
+try:
+	curots.execute('delete otdel from datacubes_ots_deliver as otdel  inner join (select o.iddeliver from datacubes_ots_deliver o where o.autline > 0 and o.ot in (select u.ot from datacubes_ots_deliver u where u.autline = 0)) as dupli on otdel.iddeliver = dupli.iddeliver')
+except MySQLdb.Error, e:
+        db.rollback()
+        try:
+           print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+        except IndexError:
+           print "MySQL Error: %s" % str(e)
+
+curstatus = conn.cursor()
+
+curstatus.execute("""
+			SELECT e_corden.FENTREGA as fsend
+			      ,replace(ltrim(e_corden.codigo), '''', '''''') as ot
+			      ,e_corden.ESTADO   
+			FROM  dato01EGAR.dbo.e_corden e_corden
+			WHERE e_corden.ESTADO not like '*PENDIENTE'
+		   	  and e_corden.FENTREGA between '"""+str(week)+"""' and '"""+str(today)+"""'
+                  """)
+ 
+rowstatus= curstatus.fetchall()
+
+for rstatus in rowstatus:
+	curstatusexecute = db.cursor()
+	delstatus="delete from datacubes_ots_deliver  where ot = '"+rstatus.ot+"'"
+	print delstatus
+	try:
+	   curstatusexecute.execute(delstatus)
+	   db.commit()
+        except MySQLdb.Error, e:
+           db.rollback()
+           try:
+              print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+           except IndexError:
+              print "MySQL Error: %s" % str(e)
 
 db.commit()
 db.close()

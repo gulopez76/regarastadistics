@@ -227,13 +227,46 @@ def agentrights_detail_vw(request, pk):
 
 @login_required(login_url='/login/')
 def carrier_vw(request):
-    carriers = carrier.objects.order_by('idcarrier')
-    return render(request, 'datacubes/carrier_list.html', {'carriers': carriers})
+      carriers = carrier.objects.order_by('idcarrier')
+      return render(request, 'datacubes/carrier_list.html', {'carriers': carriers})
 
 @login_required(login_url='/login/')
 def carrier_detail_vw(request, pk):
-    carriers = get_object_or_404(carrier, pk=pk)
-    return render(request, 'datacubes/carrier_detail.html', {'carriers': carriers})
+   type = 1
+   if request.method == "POST":
+      if request.POST['action'] == "save":
+	if request.POST['vtype'] == "1":
+		print "Save change carrier"
+		scodcarrier = request.POST['codcarrier']
+		scarriername = request.POST['carriername']
+		spk = request.POST['pkcarrier']
+		carrier.objects.filter(pk=spk).update(codcarrier = scodcarrier, carriername = scarriername)
+		carriers = carrier.objects.order_by('idcarrier')
+		return render(request, 'datacubes/carrier_list.html', {'carriers': carriers})
+	elif request.POST['vtype'] == "0":
+		print "Save new carrier"
+		scodcarrier = request.POST['codcarrier']
+		scarriername = request.POST['carriername']
+		carrier.objects.create(codcarrier = scodcarrier, carriername = scarriername)
+		carriers = carrier.objects.order_by('idcarrier')
+		return render(request, 'datacubes/carrier_list.html', {'carriers': carriers})
+   elif pk == "0":
+	print "Add value"
+        formset = carrier_form()
+        type = 0        
+	context = {
+			'type': type,
+		  }
+	return render(request, 'datacubes/carrier_edit.html', context)
+   else:
+	print "View carrier detail"
+	carriers = get_object_or_404(carrier, pk=pk)
+        print carriers.carriername
+	context = {
+		   	'carriers': carriers,
+			'type': type,
+		  }
+	return render(request, 'datacubes/carrier_edit.html', context)
 
 @login_required(login_url='/login/')
 def carrier_detail_vw_(request, pk):
